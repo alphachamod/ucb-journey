@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Academy - Join the Journey With Us</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e, #0f0f0f);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 198, 255, 0.3) 0%, transparent 50%);
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes pulseGlow {
+            0% { opacity: 0.5; }
+            100% { opacity: 0.8; }
+        }
+        
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s linear infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: logoShine 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes logoShine {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(45deg); }
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: #4ecdc4;
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            z-index: 10;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: textGradient 4s ease infinite;
+            font-weight: 800;
+            letter-spacing: -2px;
+        }
+        
+        @keyframes textGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .hero p {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease-out 0.6s both;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        /* Section Styles */
+        .section {
+            padding: 100px 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .section h2 {
+            font-size: 3rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        
+        /* Cards */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+            text-align: center;
+        }
+        
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+        }
+        
+        .card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        /* Pathways Section */
+        .pathways-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .pathway {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .pathway:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .pathway h3 {
+            color: #ff6b6b;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .pathway ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .pathway li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .pathway li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        
+        /* Interactive Features */
+        .feature-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(78, 205, 196, 0.3) 0%, transparent 70%);
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+        
+        .feature:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .feature-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .feature h4 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #4ecdc4;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .feature p {
+            opacity: 0.9;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .section {
+                padding: 60px 1rem;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-content p {
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .social-links a {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <header>
+        <nav>
+            <div class="logo">Digital Academy</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#pathways">Pathways</a></li>
+                <li><a href="#programs">Programs</a></li>
+                <li><a href="#support">Support</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Join the Journey With Us</h1>
+            <p>🧭 Embark on your digital future with cutting-edge education and industry-leading partnerships</p>
+            <a href="#pathways" class="cta-button">Explore Your Path</a>
+        </div>
+    </section>
+    
+    <section id="pathways" class="section fade-in">
+        <h2>🚀 Study Programme Pathways</h2>
+        <div class="pathways-grid">
+            <div class="pathway">
+                <h3>Ages 16–18</h3>
+                <ul>
+                    <li><strong>Level 2 & Level 3 BTECs</strong></li>
+                    <li><strong>T Levels</strong> (Technical qualifications with employer placements)</li>
+                </ul>
+            </div>
+            <div class="pathway">
+                <h3>Adult Provision</h3>
+                <ul>
+                    <li><strong>Access to HE Diplomas in:</strong></li>
+                    <li>Computer Science (CS)</li>
+                    <li>Data Science (DS)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+    
+    <section id="programs" class="section fade-in">
+        <h2>🧩 Our Courses & Initiatives</h2>
+        <div class="feature-showcase">
+            <div class="feature">
+                <div class="feature-number">01</div>
+                <h4>CyberFirst (Silver Tier)</h4>
+                <p>Government-recognised programme introducing essential <strong>cybersecurity skills</strong></p>
+            </div>
+            <div class="feature">
+                <div class="feature-number">02</div>
+                <h4>Skill Accelerator</h4>
+                <p>Focused on <strong>soft skills development</strong> with integrated skill tracking system</p>
+            </div>
+            <div class="feature">
+                <div class="feature-number">03</div>
+                <h4>WorldSkills Participation</h4>
+                <p>National competition opportunities - <em>1 out of 8 UK finalists from our academy!</em></p>
+            </div>
+            <div class="feature">
+                <div class="feature-number">04</div>
+                <h4>Girls Go Circular</h4>
+                <p>Initiative encouraging <strong>female participation in tech</strong></p>
+            </div>
+            <div class="feature">
+                <div class="feature-number">05</div>
+                <h4>Industry Placements</h4>
+                <p><strong>T Level students:</strong> 45-day mandatory placement<br><strong>BTEC students:</strong> 10 days per year</p>
+            </div>
+            <div class="feature">
+                <div class="feature-number">06</div>
+                <h4>Skill Guarantee</h4>
+                <p>Funded programme ensuring development in <strong>key soft skills</strong> with dedicated tracking</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="support" class="section fade-in">
+        <h2>🛠️ Support & Progression</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">🎓</div>
+                <h3>Degree Apprenticeship Guidance</h3>
+                <p>Comprehensive support for transitioning to degree-level apprenticeships with industry partners</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📚</div>
+                <h3>UCAS & Career Planning</h3>
+                <p>Expert guidance through university applications and strategic career pathway planning</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🤝</div>
+                <h3>Employer Partnerships</h3>
+                <p>Direct connections with industry leaders for hands-on training and real-world project experience</p>
+            </div>
+        </div>
+    </section>
+    
+    <footer id="contact">
+        <div class="footer-content">
+            <h3>Ready to Start Your Digital Journey?</h3>
+            <p>Join thousands of students who have transformed their careers through our innovative programmes</p>
+            <div class="social-links">
+                <a href="#" aria-label="Facebook">📘</a>
+                <a href="#" aria-label="Twitter">🐦</a>
+                <a href="#" aria-label="LinkedIn">💼</a>
+                <a href="#" aria-label="Instagram">📷</a>
+            </div>
+            <p style="margin-top: 2rem; opacity: 0.5;">&copy; 2025 Digital Academy. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Create floating particles
+        function createParticles() {
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                document.body.appendChild(particle);
+            }
+        }
+        
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Scroll animations
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.fade-in');
+            const windowHeight = window.innerHeight;
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+        
+        // Card hover effects
+        function addCardInteractions() {
+            const cards = document.querySelectorAll('.card, .feature, .pathway');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) rotateX(5deg)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) rotateX(0)';
+                });
+            });
+        }
+        
+        // Header scroll effect
+        function handleHeaderScroll() {
+            const header = document.querySelector('header');
+            const scrolled = window.pageYOffset;
+            
+            if (scrolled > 100) {
+                header.style.background = 'rgba(10, 10, 10, 0.95)';
+                header.style.borderBottom = '1px solid rgba(255, 255, 255, 0.2)';
+            } else {
+                header.style.background = 'rgba(10, 10, 10, 0.8)';
+                header.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
+            }
+        }
+        
+        // Mouse trail effect
+        function createMouseTrail() {
+            let mouseX = 0, mouseY = 0;
+            let trail = [];
+            
+            document.addEventListener('mousemove', function(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                const dot = document.createElement('div');
+                dot.style.position = 'fixed';
+                dot.style.left = mouseX + 'px';
+                dot.style.top = mouseY + 'px';
+                dot.style.width = '6px';
+                dot.style.height = '6px';
+                dot.style.background = 'rgba(78, 205, 196, 0.6)';
+                dot.style.borderRadius = '50%';
+                dot.style.pointerEvents = 'none';
+                dot.style.zIndex = '9999';
+                dot.style.transition = 'all 0.1s ease';
+                
+                document.body.appendChild(dot);
+                trail.push(dot);
+                
+                if (trail.length > 10) {
+                    const oldDot = trail.shift();
+                    if (oldDot && oldDot.parentNode) {
+                        oldDot.parentNode.removeChild(oldDot);
+                    }
+                }
+                
+                setTimeout(() => {
+                    if (dot && dot.parentNode) {
+                        dot.style.opacity = '0';
+                        dot.style.transform = 'scale(0)';
+                        setTimeout(() => {
+                            if (dot && dot.parentNode) {
+                                dot.parentNode.removeChild(dot);
+                            }
+                        }, 100);
+                    }
+                }, 100);
+            });
+        }
+        
+        // Parallax effect
+        function addParallaxEffect() {
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                
+                const bgAnimation = document.querySelector('.bg-animation');
+                if (bgAnimation) {
+                    bgAnimation.style.transform = `translateY(${rate}px)`;
+                }
+            });
+        }
+        
+        // Initialize all effects
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            addCardInteractions();
+            createMouseTrail();
+            addParallaxEffect();
+            
+            // Initial scroll animation check
+            handleScrollAnimations();
+            
+            // Add scroll event listeners
+            window.addEventListener('scroll', () => {
+                handleScrollAnimations();
+                handleHeaderScroll();
+            });
+            
+            // Add loading animation
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 1s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+        
+        // Interactive number counter for achievements
+        function animateNumbers() {
+            const numbers = [
+                { element: '.feature-number', target: 6, duration: 2000 }
+            ];
+            
+            numbers.forEach(item => {
+                const elements = document.querySelectorAll(item.element);
+                elements.forEach((el, index) => {
+                    const target = index + 1;
+                    let current = 0;
+                    const increment = target / (item.duration / 50);
+                    
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        el.textContent = String(Math.floor(current)).padStart(2, '0');
+                    }, 50);
+                });
+            });
+        }
+        
+        // Trigger number animation when in view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.target.classList.contains('feature-showcase')) {
+                    animateNumbers();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const featureShowcase = document.querySelector('.feature-showcase');
+            if (featureShowcase) {
+                observer.observe(featureShowcase);
+            }
+        });
+    </script>
+</body>
+</html>
