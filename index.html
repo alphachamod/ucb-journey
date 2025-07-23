@@ -3,81 +3,1287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCB Digital Academy - 3D Journey</title>
+    <title>UCB Digital Academy - Your Learning Journey</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
     <style>
-        /* Minimal fallback for loading, main styles in styles.css */
-        body { background: #000; color: #fff; margin: 0; font-family: 'Arial', sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0f23, #1a1a3a);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(100, 255, 218, 0.1);
+            border-left: 4px solid #64ffda;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #64ffda;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .loading-subtext {
+            color: #888;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        /* UI Overlay */
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Journey Title */
+        .journey-title {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #64ffda, #bb86fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(100, 255, 218, 0.5);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Age Selection Panel */
+        .age-selection {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 15, 35, 0.95);
+            border: 2px solid #64ffda;
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(15px);
+            pointer-events: auto;
+            z-index: 100;
+            text-align: center;
+            min-width: 400px;
+        }
+
+        .age-selection h2 {
+            color: #64ffda;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+
+        .age-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .age-btn {
+            background: linear-gradient(45deg, #64ffda, #03dac6);
+            border: none;
+            color: #000;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.3);
+        }
+
+        .age-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(100, 255, 218, 0.5);
+            background: linear-gradient(45deg, #bb86fc, #64ffda);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            pointer-events: auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64ffda, #bb86fc);
+            width: 0%;
+            transition: width 0.8s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #64ffda;
+            font-size: 1.1em;
+        }
+
+        /* Information Panel */
+        .info-panel {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 15, 35, 0.95);
+            border: 2px solid #64ffda;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 350px;
+            backdrop-filter: blur(15px);
+            pointer-events: auto;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .info-panel.visible {
+            opacity: 1;
+        }
+
+        .info-panel h3 {
+            color: #64ffda;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .info-panel p {
+            color: #ccc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .info-details {
+            background: rgba(100, 255, 218, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .info-details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-details li {
+            color: #64ffda;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-details li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #bb86fc;
+        }
+
+        /* Controls Hint */
+        .controls-hint {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 25px;
+            color: #64ffda;
+            font-size: 1.1em;
+            text-align: center;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Mobile Touch Controls */
+        .touch-joystick {
+            position: fixed;
+            left: 30px;
+            bottom: 30px;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(100, 255, 218, 0.1);
+            border: 3px solid #64ffda;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            touch-action: none;
+        }
+
+        .touch-joystick.mobile {
+            display: flex;
+        }
+
+        .touch-joystick-knob {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #64ffda, #03dac6);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.4);
+            transition: transform 0.1s ease;
+        }
+
+        .interaction-hint {
+            position: absolute;
+            background: rgba(15, 15, 35, 0.95);
+            border: 2px solid #bb86fc;
+            border-radius: 15px;
+            padding: 15px 20px;
+            color: #bb86fc;
+            font-size: 1.1em;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+        }
+
+        .interaction-hint.visible {
+            opacity: 1;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .journey-title {
+                font-size: 1.8em;
+                top: 20px;
+            }
+
+            .age-selection {
+                min-width: 90vw;
+                padding: 30px 20px;
+            }
+
+            .info-panel {
+                right: 15px;
+                left: 15px;
+                max-width: none;
+                transform: translateY(-50%);
+            }
+
+            .progress-container {
+                width: 90%;
+                bottom: 20px;
+            }
+
+            .controls-hint {
+                display: none;
+            }
+
+            .age-btn {
+                font-size: 1.1em;
+                padding: 18px 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .journey-title {
+                font-size: 1.5em;
+            }
+
+            .age-selection h2 {
+                font-size: 1.5em;
+            }
+
+            .touch-joystick {
+                width: 80px;
+                height: 80px;
+                left: 20px;
+                bottom: 20px;
+            }
+
+            .touch-joystick-knob {
+                width: 40px;
+                height: 40px;
+            }
+        }
     </style>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Loading Screen -->
-    <div class="loading-screen" id="loading-screen" role="status" aria-live="polite">
+    <div class="loading-screen" id="loadingScreen">
         <div class="loader"></div>
-        <h2>Loading UCB Digital Academy 3D Experience...</h2>
-        <p>Preparing your immersive journey</p>
+        <div class="loading-text">UCB Digital Academy</div>
+        <div class="loading-subtext">Launching your personalized journey...</div>
     </div>
 
-    <!-- Main 3D Canvas -->
-    <div id="canvas-container" aria-label="3D Journey Environment"></div>
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
 
-    <!-- UI Overlay (all floating panels) -->
-    <div id="ui-overlay" aria-live="polite">
-        <!-- Scene Title -->
-        <div id="scene-title" class="ui-element" role="heading" aria-level="1">Welcome to UCB Digital Academy</div>
-        
-        <!-- Minimap -->
-        <div id="minimap" class="ui-element" aria-label="Minimap">
-            <canvas id="minimap-canvas" width="200" height="150"></canvas>
-        </div>
-        
-        <!-- Navigation Panel -->
-        <nav id="navigation-panel" class="ui-element" aria-label="Journey Navigation">
-            <h3>Navigation</h3>
-            <button class="scene-button" onclick="journey.goToScene(0)">Welcome Hub</button>
-            <button class="scene-button" onclick="journey.goToScene(1)">Journey Gateway</button>
-            <button class="scene-button" onclick="journey.goToScene(2)">Study Programmes</button>
-            <button class="scene-button" onclick="journey.goToScene(3)">Core Knowledge Lab</button>
-            <button class="scene-button" onclick="journey.goToScene(4)">Specialised Programmes</button>
-            <button class="scene-button" onclick="journey.goToScene(5)">Industry Placement</button>
-            <button class="scene-button" onclick="journey.goToScene(6)">Progress Tracking</button>
-            <button class="scene-button" onclick="journey.goToScene(7)">Future Launch</button>
-            <button class="scene-button" onclick="journey.toggleChatbot()">🤖 Chat Guide</button>
-        </nav>
-        
-        <!-- Progress Bar -->
-        <div id="progress-bar" class="ui-element" aria-label="Journey Progress">
-            <div id="progress-fill"></div>
-        </div>
-        
-        <!-- Info Panel -->
-        <aside id="info-panel" class="info-panel ui-element" aria-live="polite">
-            <h3 id="info-title">Scene Information</h3>
-            <p id="info-content">Navigate through the 3D environment to explore UCB Digital Academy's offerings.</p>
-        </aside>
-        
-        <!-- Control Hint -->
-        <div class="control-hint" aria-label="Controls">
-            Use WASD to move, Mouse to look around, Click objects to interact
-        </div>
-    </div>
+    <!-- UI Overlay -->
+    <div id="ui-overlay">
+        <!-- Journey Title -->
+        <div class="journey-title">Your Learning Journey Awaits</div>
 
-    <!-- Chatbot Panel (hidden by default) -->
-    <section id="chatbot-panel" aria-label="Digital Academy Chatbot" tabindex="0">
-        <div id="chatbot-header">
-            🤖 Digital Academy Guide
-        </div>
-        <div id="chatbot-messages">
-            <div style="margin-bottom: 10px; padding: 10px; background: rgba(0, 255, 255, 0.1); border-radius: 10px;">
-                Welcome! I'm your digital guide. Ask me anything about UCB Digital Academy!
+        <!-- Age Selection Panel -->
+        <div class="age-selection" id="ageSelection">
+            <h2>Choose Your Learning Path</h2>
+            <div class="age-buttons">
+                <button class="age-btn" onclick="startJourney('16-18')">
+                    Ages 16-18<br>
+                    <small style="font-weight: normal; color: #666;">Foundation & A-Levels</small>
+                </button>
+                <button class="age-btn" onclick="startJourney('18-21')">
+                    Ages 18-21<br>
+                    <small style="font-weight: normal; color: #666;">Undergraduate Degrees</small>
+                </button>
+                <button class="age-btn" onclick="startJourney('21+')">
+                    Ages 21+<br>
+                    <small style="font-weight: normal; color: #666;">Postgraduate & Professional</small>
+                </button>
             </div>
         </div>
-        <input type="text" id="chatbot-input" placeholder="Ask me about courses, programmes, or anything else..." onkeypress="handleChatInput(event)" aria-label="Chatbot input">
-    </section>
 
-    <!-- Main script -->
-    <script src="script.js"></script>
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Select your age group to begin</div>
+        </div>
+
+        <!-- Information Panel -->
+        <div class="info-panel" id="infoPanel">
+            <h3 id="infoTitle">Welcome</h3>
+            <p id="infoContent">Choose your age group to discover tailored learning opportunities at UCB Digital Academy.</p>
+            <div class="info-details" id="infoDetails" style="display: none;">
+                <ul id="infoList"></ul>
+            </div>
+        </div>
+
+        <!-- Controls Hint -->
+        <div class="controls-hint" id="controlsHint">
+            Use WASD to move • Mouse to look around • Click objects to interact
+        </div>
+
+        <!-- Interaction Hint -->
+        <div class="interaction-hint" id="interactionHint">
+            Click to explore!
+        </div>
+    </div>
+
+    <!-- Touch Controls for Mobile -->
+    <div class="touch-joystick" id="touchJoystick">
+        <div class="touch-joystick-knob" id="touchJoystickKnob"></div>
+    </div>
+
+    <script>
+        // Global variables
+        let scene, camera, renderer, controls;
+        let journey = null;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let currentPath = null;
+        let journeyStations = [];
+        let currentStation = 0;
+
+        // Learning path data
+        const pathData = {
+            '16-18': {
+                title: 'Foundation & A-Level Path',
+                color: 0x64ffda,
+                stations: [
+                    {
+                        title: 'Foundation Courses',
+                        content: 'Build essential skills for higher education',
+                        details: [
+                            'Art & Design Foundation',
+                            'Business Foundation',
+                            'Computing Foundation',
+                            'Media Foundation'
+                        ],
+                        position: { x: 0, z: -10 }
+                    },
+                    {
+                        title: 'A-Level Programmes',
+                        content: 'Advanced study in creative and technical subjects',
+                        details: [
+                            'Creative Media Production',
+                            'Digital Technology',
+                            'Business Studies',
+                            'Art & Design'
+                        ],
+                        position: { x: -8, z: -20 }
+                    },
+                    {
+                        title: 'BTEC Courses',
+                        content: 'Practical, work-related learning',
+                        details: [
+                            'Extended Diploma in Creative Media',
+                            'Extended Diploma in Computing',
+                            'Extended Diploma in Business',
+                            'Extended Diploma in Art & Design'
+                        ],
+                        position: { x: 8, z: -30 }
+                    },
+                    {
+                        title: 'University Preparation',
+                        content: 'Get ready for the next step',
+                        details: [
+                            'UCAS Application Support',
+                            'Portfolio Development',
+                            'Interview Preparation',
+                            'University Partnerships'
+                        ],
+                        position: { x: 0, z: -40 }
+                    }
+                ]
+            },
+            '18-21': {
+                title: 'Undergraduate Degree Path',
+                color: 0xbb86fc,
+                stations: [
+                    {
+                        title: 'Degree Programmes',
+                        content: 'Bachelor\'s degrees in creative industries',
+                        details: [
+                            'BA Digital Media Arts',
+                            'BSc Computer Games Development',
+                            'BA Music Production',
+                            'BA Graphic Design & Illustration'
+                        ],
+                        position: { x: 0, z: -10 }
+                    },
+                    {
+                        title: 'Practical Learning',
+                        content: 'Industry-standard facilities and equipment',
+                        details: [
+                            'Professional Recording Studios',
+                            'High-end Gaming Labs',
+                            'Digital Design Suites',
+                            'Film & Photography Studios'
+                        ],
+                        position: { x: -10, z: -20 }
+                    },
+                    {
+                        title: 'Industry Connections',
+                        content: 'Real-world experience and networking',
+                        details: [
+                            'Work Placement Opportunities',
+                            'Industry Guest Lectures',
+                            'Live Project Briefs',
+                            'Graduate Employment Support'
+                        ],
+                        position: { x: 10, z: -30 }
+                    },
+                    {
+                        title: 'Career Development',
+                        content: 'Prepare for your professional future',
+                        details: [
+                            'Portfolio Development',
+                            'Professional Skills Training',
+                            'Industry Certifications',
+                            'Graduate Showcase Events'
+                        ],
+                        position: { x: 0, z: -40 }
+                    }
+                ]
+            },
+            '21+': {
+                title: 'Postgraduate & Professional Path',
+                color: 0xff6b9d,
+                stations: [
+                    {
+                        title: 'Master\'s Degrees',
+                        content: 'Advanced study and specialization',
+                        details: [
+                            'MA Creative Industries Management',
+                            'MSc Data Science & Analytics',
+                            'MA Digital Film Production',
+                            'MBA Creative Leadership'
+                        ],
+                        position: { x: 0, z: -10 }
+                    },
+                    {
+                        title: 'Professional Development',
+                        content: 'Enhance your career prospects',
+                        details: [
+                            'Industry-Certified Courses',
+                            'Executive Education Programs',
+                            'Skills Bootcamps',
+                            'Leadership Development'
+                        ],
+                        position: { x: -12, z: -20 }
+                    },
+                    {
+                        title: 'Research & Innovation',
+                        content: 'Contribute to cutting-edge developments',
+                        details: [
+                            'Research Projects',
+                            'Innovation Labs',
+                            'Industry Partnerships',
+                            'Academic Publications'
+                        ],
+                        position: { x: 12, z: -30 }
+                    },
+                    {
+                        title: 'Career Advancement',
+                        content: 'Accelerate your professional growth',
+                        details: [
+                            'Executive Mentoring',
+                            'Professional Networks',
+                            'Career Coaching',
+                            'Alumni Support'
+                        ],
+                        position: { x: 0, z: -40 }
+                    }
+                ]
+            }
+        };
+
+        // Initialize the application
+        function init() {
+            setupScene();
+            setupControls();
+            setupEventListeners();
+            animate();
+            
+            // Hide loading screen after a delay
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 2000);
+        }
+
+        // Setup Three.js scene
+        function setupScene() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x0a0a1a, 50, 200);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 2, 5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x0a0a1a);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Lighting setup
+            const ambientLight = new THREE.AmbientLight(0x404080, 0.3);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0x64ffda, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+
+            // Create initial environment
+            createEnvironment();
+        }
+
+        // Create the 3D environment
+        function createEnvironment() {
+            // Ground plane
+            const groundGeometry = new THREE.PlaneGeometry(200, 200);
+            const groundMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x1a1a2e,
+                transparent: true,
+                opacity: 0.8
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+
+            // Starfield background
+            createStarfield();
+
+            // Floating particles
+            createParticles();
+        }
+
+        // Create starfield
+        function createStarfield() {
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsMaterial = new THREE.PointsMaterial({ 
+                color: 0x64ffda,
+                size: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const starsVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 2000;
+                const y = (Math.random() - 0.5) * 2000;
+                const z = (Math.random() - 0.5) * 2000;
+                starsVertices.push(x, y, z);
+            }
+
+            starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            const starField = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starField);
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const particleCount = 100;
+            const particles = new THREE.Group();
+
+            for (let i = 0; i < particleCount; i++) {
+                const geometry = new THREE.SphereGeometry(0.02, 8, 8);
+                const material = new THREE.MeshBasicMaterial({
+                    color: Math.random() > 0.5 ? 0x64ffda : 0xbb86fc,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                
+                const particle = new THREE.Mesh(geometry, material);
+                particle.position.set(
+                    (Math.random() - 0.5) * 100,
+                    Math.random() * 20 + 1,
+                    (Math.random() - 0.5) * 100
+                );
+                
+                particle.userData = {
+                    originalY: particle.position.y,
+                    speed: Math.random() * 0.02 + 0.01
+                };
+                
+                particles.add(particle);
+            }
+
+            scene.add(particles);
+            
+            // Animate particles
+            function animateParticles() {
+                particles.children.forEach((particle, index) => {
+                    particle.position.y = particle.userData.originalY + 
+                        Math.sin(Date.now() * particle.userData.speed + index) * 2;
+                });
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+        }
+
+        // Setup controls
+        function setupControls() {
+            if (isMobile) {
+                setupMobileControls();
+                document.getElementById('touchJoystick').classList.add('mobile');
+                document.getElementById('controlsHint').style.display = 'none';
+            } else {
+                setupDesktopControls();
+            }
+        }
+
+        // Desktop controls (WASD + Mouse)
+        function setupDesktopControls() {
+            const keys = { w: false, a: false, s: false, d: false };
+            
+            document.addEventListener('keydown', (e) => {
+                switch(e.code) {
+                    case 'KeyW': keys.w = true; break;
+                    case 'KeyA': keys.a = true; break;
+                    case 'KeyS': keys.s = true; break;
+                    case 'KeyD': keys.d = true; break;
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                switch(e.code) {
+                    case 'KeyW': keys.w = false; break;
+                    case 'KeyA': keys.a = false; break;
+                    case 'KeyS': keys.s = false; break;
+                    case 'KeyD': keys.d = false; break;
+                }
+            });
+
+            // Mouse look
+            let isMouseDown = false;
+            let mouseX = 0, mouseY = 0;
+
+            document.addEventListener('mousedown', () => isMouseDown = true);
+            document.addEventListener('mouseup', () => isMouseDown = false);
+            document.addEventListener('mousemove', (e) => {
+                if (isMouseDown) {
+                    const deltaX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+                    const deltaY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+                    
+                    camera.rotation.y -= deltaX * 0.002;
+                    camera.rotation.x -= deltaY * 0.002;
+                    camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+                }
+            });
+
+            // Movement update function
+            function updateMovement() {
+                const speed = 0.1;
+                const direction = new THREE.Vector3();
+                
+                if (keys.w) {
+                    camera.getWorldDirection(direction);
+                    camera.position.addScaledVector(direction, speed);
+                }
+                if (keys.s) {
+                    camera.getWorldDirection(direction);
+                    camera.position.addScaledVector(direction, -speed);
+                }
+                if (keys.a) {
+                    camera.getWorldDirection(direction);
+                    const left = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+                    camera.position.addScaledVector(left, speed);
+                }
+                if (keys.d) {
+                    camera.getWorldDirection(direction);
+                    const right = new THREE.Vector3().crossVectors(direction, camera.up).normalize();
+                    camera.position.addScaledVector(right, speed);
+                }
+
+                requestAnimationFrame(updateMovement);
+            }
+            updateMovement();
+        }
+
+        // Mobile touch controls
+        function setupMobileControls() {
+            const joystick = document.getElementById('touchJoystick');
+            const knob = document.getElementById('touchJoystickKnob');
+            let joystickActive = false;
+            let joystickStartPos = { x: 0, y: 0 };
+            let joystickDirection = { x: 0, y: 0 };
+
+            // Joystick events
+            joystick.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                joystickActive = true;
+                const touch = e.touches[0];
+                const rect = joystick.getBoundingClientRect();
+                joystickStartPos.x = touch.clientX - rect.left - rect.width / 2;
+                joystickStartPos.y = touch.clientY - rect.top - rect.height / 2;
+            });
+
+            joystick.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!joystickActive) return;
+
+                const touch = e.touches[0];
+                const rect = joystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                let deltaX = touch.clientX - centerX;
+                let deltaY = touch.clientY - centerY;
+                
+                const maxDistance = 35;
+                const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                
+                if (distance > maxDistance) {
+                    deltaX = (deltaX / distance) * maxDistance;
+                    deltaY = (deltaY / distance) * maxDistance;
+                }
+                
+                knob.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                joystickDirection.x = deltaX / maxDistance;
+                joystickDirection.y = deltaY / maxDistance;
+            });
+
+            joystick.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                joystickActive = false;
+                knob.style.transform = 'translate(0, 0)';
+                joystickDirection.x = 0;
+                joystickDirection.y = 0;
+            });
+
+            // Touch look controls
+            let lookActive = false;
+            let lastTouchX = 0, lastTouchY = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.closest('#touchJoystick') || e.target.closest('.age-selection')) return;
+                lookActive = true;
+                lastTouchX = e.touches[0].clientX;
+                lastTouchY = e.touches[0].clientY;
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!lookActive) return;
+                e.preventDefault();
+                
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - lastTouchX;
+                const deltaY = touch.clientY - lastTouchY;
+                
+                camera.rotation.y -= deltaX * 0.003;
+                camera.rotation.x -= deltaY * 0.003;
+                camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, camera.rotation.x));
+                
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+            });
+
+            document.addEventListener('touchend', () => {
+                lookActive = false;
+            });
+
+            // Mobile movement update
+            function updateMobileMovement() {
+                if (joystickActive && (joystickDirection.x !== 0 || joystickDirection.y !== 0)) {
+                    const speed = 0.08;
+                    const direction = new THREE.Vector3();
+                    
+                    // Forward/backward movement
+                    if (joystickDirection.y !== 0) {
+                        camera.getWorldDirection(direction);
+                        camera.position.addScaledVector(direction, -joystickDirection.y * speed);
+                    }
+                    
+                    // Left/right movement
+                    if (joystickDirection.x !== 0) {
+                        camera.getWorldDirection(direction);
+                        const right = new THREE.Vector3().crossVectors(direction, camera.up).normalize();
+                        camera.position.addScaledVector(right, joystickDirection.x * speed);
+                    }
+                }
+                requestAnimationFrame(updateMobileMovement);
+            }
+            updateMobileMovement();
+        }
+
+        // Start the journey with selected age group
+        function startJourney(ageGroup) {
+            currentPath = ageGroup;
+            const pathInfo = pathData[ageGroup];
+            
+            // Hide age selection
+            document.getElementById('ageSelection').style.display = 'none';
+            
+            // Show info panel
+            const infoPanel = document.getElementById('infoPanel');
+            infoPanel.classList.add('visible');
+            
+            // Update title
+            document.querySelector('.journey-title').textContent = pathInfo.title;
+            
+            // Create the journey path
+            createJourneyPath(pathInfo);
+            
+            // Update progress
+            updateProgress();
+            
+            // Position camera at start
+            camera.position.set(0, 3, 8);
+            camera.lookAt(0, 0, 0);
+        }
+
+        // Create the 3D journey path
+        function createJourneyPath(pathInfo) {
+            journeyStations = [];
+            
+            // Create main path road
+            createMainRoad(pathInfo.stations);
+            
+            // Create information stations
+            pathInfo.stations.forEach((station, index) => {
+                const stationMesh = createStation(station, index, pathInfo.color);
+                journeyStations.push(stationMesh);
+                scene.add(stationMesh);
+            });
+            
+            // Create connecting bridges/paths
+            createConnectingPaths(pathInfo.stations);
+        }
+
+        // Create the main road
+        function createMainRoad(stations) {
+            const roadWidth = 4;
+            const roadSegments = [];
+            
+            for (let i = 0; i < stations.length - 1; i++) {
+                const start = stations[i].position;
+                const end = stations[i + 1].position;
+                
+                const distance = Math.sqrt(
+                    Math.pow(end.x - start.x, 2) + Math.pow(end.z - start.z, 2)
+                );
+                
+                const roadGeometry = new THREE.PlaneGeometry(roadWidth, distance);
+                const roadMaterial = new THREE.MeshLambertMaterial({
+                    color: 0x2a2a3e,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const road = new THREE.Mesh(roadGeometry, roadMaterial);
+                road.rotation.x = -Math.PI / 2;
+                road.position.set(
+                    (start.x + end.x) / 2,
+                    0.01,
+                    (start.z + end.z) / 2
+                );
+                
+                // Calculate rotation to face the next station
+                const angle = Math.atan2(end.x - start.x, end.z - start.z);
+                road.rotation.y = angle;
+                
+                scene.add(road);
+                roadSegments.push(road);
+                
+                // Add road markings
+                const markingGeometry = new THREE.PlaneGeometry(0.2, distance);
+                const markingMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x64ffda,
+                    transparent: true,
+                    opacity: 0.6
+                });
+                
+                const marking = new THREE.Mesh(markingGeometry, markingMaterial);
+                marking.rotation.x = -Math.PI / 2;
+                marking.position.set(
+                    (start.x + end.x) / 2,
+                    0.02,
+                    (start.z + end.z) / 2
+                );
+                marking.rotation.y = angle;
+                
+                scene.add(marking);
+            }
+        }
+
+        // Create information station
+        function createStation(stationData, index, color) {
+            const group = new THREE.Group();
+            
+            // Station platform
+            const platformGeometry = new THREE.CylinderGeometry(3, 3, 0.2, 16);
+            const platformMaterial = new THREE.MeshPhongMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.8,
+                emissive: color,
+                emissiveIntensity: 0.1
+            });
+            
+            const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+            platform.position.set(stationData.position.x, 0, stationData.position.z);
+            platform.castShadow = true;
+            platform.receiveShadow = true;
+            group.add(platform);
+            
+            // Information pillar
+            const pillarGeometry = new THREE.CylinderGeometry(0.3, 0.3, 4, 16);
+            const pillarMaterial = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                emissive: color,
+                emissiveIntensity: 0.2
+            });
+            
+            const pillar = new THREE.Mesh(pillarGeometry, pillarMaterial);
+            pillar.position.set(stationData.position.x, 2, stationData.position.z);
+            pillar.castShadow = true;
+            group.add(pillar);
+            
+            // Floating title text
+            const titleMesh = createFloatingText(stationData.title, 0.5, color);
+            titleMesh.position.set(stationData.position.x, 4.5, stationData.position.z);
+            group.add(titleMesh);
+            
+            // Interactive marker
+            const markerGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            const markerMaterial = new THREE.MeshPhongMaterial({
+                color: color,
+                emissive: color,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+            marker.position.set(stationData.position.x, 5, stationData.position.z);
+            marker.userData = {
+                interactive: true,
+                stationIndex: index,
+                stationData: stationData
+            };
+            group.add(marker);
+            
+            // Add pulsing animation to marker
+            const originalScale = marker.scale.clone();
+            marker.userData.animate = function() {
+                const time = Date.now() * 0.003;
+                const scale = 1 + Math.sin(time) * 0.2;
+                marker.scale.setScalar(scale);
+                marker.rotation.y += 0.01;
+            };
+            
+            // Store references
+            group.userData = {
+                marker: marker,
+                stationData: stationData,
+                index: index
+            };
+            
+            return group;
+        }
+
+        // Create floating text
+        function createFloatingText(text, size, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
+            
+            context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+            context.font = 'bold 48px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, 256, 64);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                alphaTest: 0.1
+            });
+            
+            const geometry = new THREE.PlaneGeometry(4, 1);
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            return mesh;
+        }
+
+        // Create connecting paths between stations
+        function createConnectingPaths(stations) {
+            for (let i = 0; i < stations.length - 1; i++) {
+                const start = stations[i].position;
+                const end = stations[i + 1].position;
+                
+                // Create glowing connection line
+                const points = [
+                    new THREE.Vector3(start.x, 1, start.z),
+                    new THREE.Vector3(end.x, 1, end.z)
+                ];
+                
+                const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                const material = new THREE.LineBasicMaterial({
+                    color: 0x64ffda,
+                    transparent: true,
+                    opacity: 0.6,
+                    linewidth: 3
+                });
+                
+                const line = new THREE.Line(geometry, material);
+                scene.add(line);
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Click/touch interaction
+            if (isMobile) {
+                renderer.domElement.addEventListener('touchend', onInteraction);
+            } else {
+                renderer.domElement.addEventListener('click', onInteraction);
+            }
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Handle interaction (click/touch)
+        function onInteraction(event) {
+            event.preventDefault();
+            
+            const mouse = new THREE.Vector2();
+            
+            if (isMobile && event.type === 'touchend') {
+                if (event.changedTouches.length === 0) return;
+                const touch = event.changedTouches[0];
+                mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+            } else {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            }
+            
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Check for interactive objects
+            const interactiveObjects = [];
+            journeyStations.forEach(station => {
+                if (station.userData.marker) {
+                    interactiveObjects.push(station.userData.marker);
+                }
+            });
+            
+            const intersects = raycaster.intersectObjects(interactiveObjects);
+            
+            if (intersects.length > 0) {
+                const clickedObject = intersects[0].object;
+                if (clickedObject.userData.interactive) {
+                    showStationInfo(clickedObject.userData.stationData, clickedObject.userData.stationIndex);
+                    
+                    // Visual feedback
+                    clickedObject.material.emissiveIntensity = 1;
+                    setTimeout(() => {
+                        clickedObject.material.emissiveIntensity = 0.5;
+                    }, 200);
+                }
+            }
+        }
+
+        // Show station information
+        function showStationInfo(stationData, stationIndex) {
+            const infoPanel = document.getElementById('infoPanel');
+            const infoTitle = document.getElementById('infoTitle');
+            const infoContent = document.getElementById('infoContent');
+            const infoDetails = document.getElementById('infoDetails');
+            const infoList = document.getElementById('infoList');
+            
+            infoTitle.textContent = stationData.title;
+            infoContent.textContent = stationData.content;
+            
+            // Show details
+            infoDetails.style.display = 'block';
+            infoList.innerHTML = '';
+            stationData.details.forEach(detail => {
+                const li = document.createElement('li');
+                li.textContent = detail;
+                infoList.appendChild(li);
+            });
+            
+            // Update progress
+            currentStation = stationIndex;
+            updateProgress();
+            
+            // Show interaction hint
+            showInteractionHint();
+        }
+
+        // Show interaction hint
+        function showInteractionHint() {
+            const hint = document.getElementById('interactionHint');
+            hint.classList.add('visible');
+            setTimeout(() => {
+                hint.classList.remove('visible');
+            }, 2000);
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            if (!currentPath) return;
+            
+            const totalStations = pathData[currentPath].stations.length;
+            const progress = ((currentStation + 1) / totalStations) * 100;
+            
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = 
+                `Station ${currentStation + 1} of ${totalStations} - ${pathData[currentPath].stations[currentStation]?.title || 'Complete'}`;
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Animate station markers
+            journeyStations.forEach(station => {
+                if (station.userData.marker && station.userData.marker.userData.animate) {
+                    station.userData.marker.userData.animate();
+                }
+            });
+            
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Initialize the application when page loads
+        window.addEventListener('load', init);
+    </script>
 </body>
 </html>
